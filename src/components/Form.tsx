@@ -45,6 +45,8 @@ export default function Form() {
 
   const cloudness = watch("max_cloud_cover");
 
+  console.log(errors);
+
   useEffect(() => {
     if (lngLat.lng !== getValues("longitude")) {
       setValue("longitude", lngLat.lng);
