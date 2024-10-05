@@ -109,6 +109,7 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   if (!lngLat) return null;
 
   return (
+    // @ts-expect-error: types fuck around
     <MapContext.Provider value={{ map, lngLat, setLngLat, mapContainerId }}>
       {children}
     </MapContext.Provider>

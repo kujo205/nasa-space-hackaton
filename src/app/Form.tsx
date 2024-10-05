@@ -45,7 +45,7 @@ export default function Form() {
     handleSubmit,
     control,
     register,
-    formState,
+    formState: { errors },
     setValue,
     getValues,
     watch,
@@ -55,8 +55,6 @@ export default function Form() {
       max_cloud_cover: 100,
     },
   });
-
-  console.log("formState", formState);
 
   const cloudness = watch("max_cloud_cover");
 
@@ -120,7 +118,7 @@ export default function Form() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <LabelWrapper label="Latitude">
+            <LabelWrapper error={errors.latitude?.message} label="Latitude">
               <Input
                 id="latitude"
                 min={-90}
@@ -140,7 +138,7 @@ export default function Form() {
                 }}
               />
             </LabelWrapper>
-            <LabelWrapper label="Longitude">
+            <LabelWrapper error={errors.longitude?.message} label="Longitude">
               <Input
                 id="longitude"
                 min={-180}
@@ -162,7 +160,10 @@ export default function Form() {
             </LabelWrapper>
           </div>
           <div className="space-y-2">
-            <LabelWrapper label={`Maximum Cloud Cover (${cloudness}%)`}>
+            <LabelWrapper
+              error={errors.max_cloud_cover?.message}
+              label={`Maximum Cloud Cover (${cloudness}%)`}
+            >
               <Controller
                 name="max_cloud_cover"
                 control={control}
@@ -179,7 +180,10 @@ export default function Form() {
             </LabelWrapper>
           </div>
           <div className="space-y-2">
-            <LabelWrapper label="Email for Notifications">
+            <LabelWrapper
+              error={errors.email?.message}
+              label="Email for Notifications"
+            >
               <Input
                 id="email"
                 type="email"
@@ -208,7 +212,10 @@ export default function Form() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="acquisition">
-              <LabelWrapper label="Notification Lead Time (days)">
+              <LabelWrapper
+                error={errors.span_start_time?.message}
+                label="Notification Lead Time (days)"
+              >
                 <Input
                   id="leadTime"
                   type="number"
@@ -219,7 +226,10 @@ export default function Form() {
             </TabsContent>
             <TabsContent value="historic">
               <div className="flex gap-5 flex-wrap">
-                <LabelWrapper label="Start Date">
+                <LabelWrapper
+                  error={errors.span_start_time?.message}
+                  label="Start Date"
+                >
                   <Controller
                     name="span_start_time"
                     control={control}
@@ -231,7 +241,10 @@ export default function Form() {
                     )}
                   />
                 </LabelWrapper>
-                <LabelWrapper label="End Date">
+                <LabelWrapper
+                  error={errors.span_end_time?.message}
+                  label="End Date"
+                >
                   <Controller
                     name="span_end_time"
                     control={control}

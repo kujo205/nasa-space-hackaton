@@ -11,17 +11,22 @@ interface LabelWrapperProps {
   label: string;
   children: React.ReactNode;
   className?: string;
+  error?: string;
 }
 
 export function LabelWrapper({
   label,
   children,
   className,
+  error,
 }: LabelWrapperProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <Label className={cn("font-semibold", className)}>{label}</Label>
+    <div className="flex flex-col">
+      <Label className={cn("font-semibold mt-2 mb-2", className)}>
+        {label}
+      </Label>
       {children}
+      {error && <span className="text-sm text-red-500 mt-1.5">{error}</span>}
     </div>
   );
 }
