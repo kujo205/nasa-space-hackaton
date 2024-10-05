@@ -1,70 +1,89 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Slider } from "@/components/ui/slider"
-import { useState } from 'react'
-import { useMap } from './maps/mapProvider'
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
+import { FormEventHandler, useState } from "react";
+import { useMap } from "./maps/mapProvider";
 
 export default function Form() {
-  const [cloudCover, setCloudCover] = useState(50)
-  const [email, setEmail] = useState('')
-  const [leadTime, setLeadTime] = useState(1)
-  const [emailError, setEmailError] = useState('')
-  const [acquisitionType, setAcquisitionType] = useState('most-recent')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [historicalDate, setHistoricalDate] = useState('')
-  const { lngLat, setLngLat, mapContainerId } = useMap()
-
+  const [cloudCover, setCloudCover] = useState(50);
+  const [email, setEmail] = useState("");
+  const [leadTime, setLeadTime] = useState(1);
+  const [emailError, setEmailError] = useState("");
+  const [acquisitionType, setAcquisitionType] = useState("most-recent");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [historicalDate, setHistoricalDate] = useState("");
+  const { lngLat, setLngLat, mapContainerId } = useMap();
 
   const validateEmail = (email: string) => {
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return re.test(String(email).toLowerCase())
-  }
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(String(email).toLowerCase());
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
     if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address')
-      return
+      setEmailError("Please enter a valid email address");
+      return;
     }
-    setEmailError('')
+    setEmailError("");
 
-    const notificationDetails = `${leadTime} day${leadTime > 1 ? 's' : ''} before the event`
+    const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
 
-    let acquisitionDetails
+    let acquisitionDetails;
     switch (acquisitionType) {
-      case 'most-recent':
-        acquisitionDetails = 'Most recent acquisition'
-        break
-      case 'time-span':
-        acquisitionDetails = `Acquisitions from ${startDate} to ${endDate}`
-        break
-      case 'historical':
-        acquisitionDetails = `Historical data from ${historicalDate}`
-        break
+      case "most-recent":
+        acquisitionDetails = "Most recent acquisition";
+        break;
+      case "time-span":
+        acquisitionDetails = `Acquisitions from ${startDate} to ${endDate}`;
+        break;
+      case "historical":
+        acquisitionDetails = `Historical data from ${historicalDate}`;
+        break;
     }
 
     // Here you would typically send the data to your backend
-    console.log('Submitting:', { lngLat, cloudCover, email, leadTime, acquisitionType, acquisitionDetails })
-    alert(`Notification settings saved! You will be notified ${notificationDetails} for ${acquisitionDetails} when Landsat passes over the selected location.`)
-  }
+    console.log("Submitting:", {
+      lngLat,
+      cloudCover,
+      email,
+      leadTime,
+      acquisitionType,
+      acquisitionDetails,
+    });
+    alert(
+      `Notification settings saved! You will be notified ${notificationDetails} for ${acquisitionDetails} when Landsat passes over the selected location.`,
+    );
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Landsat 8/9 Notification Service</CardTitle>
-        <CardDescription>Get notified when Landsat satellites pass over your location</CardDescription>
+        <CardDescription>
+          Get notified when Landsat satellites pass over your location
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="map">Select Location on Map</Label>
-            <div id={mapContainerId} className="h-64 rounded-md overflow-hidden" />
+            <div
+              id={mapContainerId}
+              className="h-64 rounded-md overflow-hidden"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             {/* <div className="space-y-2"> */}
@@ -122,7 +141,10 @@ export default function Form() {
           </div>
           <div className="space-y-4">
             <Label>Landsat Acquisition Preference</Label>
-            <RadioGroup value={acquisitionType} onValueChange={setAcquisitionType}>
+            <RadioGroup
+              value={acquisitionType}
+              onValueChange={setAcquisitionType}
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="most-recent" id="most-recent" />
                 <Label htmlFor="most-recent">Most Recent Acquisition</Label>
@@ -136,7 +158,7 @@ export default function Form() {
                 <Label htmlFor="historical">Historical Data</Label>
               </div>
             </RadioGroup>
-            {acquisitionType === 'time-span' && (
+            {acquisitionType === "time-span" && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="startDate">Start Date</Label>
@@ -158,7 +180,7 @@ export default function Form() {
                 </div>
               </div>
             )}
-            {acquisitionType === 'historical' && (
+            {acquisitionType === "historical" && (
               <div className="space-y-2">
                 <Label htmlFor="historicalDate">Historical Date</Label>
                 <Input
@@ -176,5 +198,5 @@ export default function Form() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
