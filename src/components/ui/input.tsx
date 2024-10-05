@@ -1,10 +1,29 @@
 import * as React from "react";
-
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   lol?: string;
+}
+
+interface LabelWrapperProps {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function LabelWrapper({
+  label,
+  children,
+  className,
+}: LabelWrapperProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Label className={cn("font-semibold", className)}>{label}</Label>
+      {children}
+    </div>
+  );
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(

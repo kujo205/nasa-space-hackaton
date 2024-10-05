@@ -8,54 +8,70 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/datepicker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import { useMap } from "./maps/mapProvider";
 import { motion } from "framer-motion";
 import Zod from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LabelWrapper } from "@/components/ui/input";
+
+const tabs = ["acquisition", "historic"] as const;
 
 const formValidator = Zod.object({
-  cloudCover: Zod.number().int().min(0).max(100),
   email: Zod.string().email(),
-  leadTime: Zod.number().int().min(1),
-  acquisitionType: Zod.enum(["most-recent", "time-span", "historical"]),
-  startDate: Zod.string().optional(),
-  endDate: Zod.string().optional(),
-  historicalDate: Zod.string().optional(),
-  lng: Zod.number().min(-180).max(180),
-  lat: Zod.number().min(-90).max(90),
+  latitude: Zod.coerce.number().min(-90).max(90),
+  longitude: Zod.coerce.number().min(-180).max(180),
+  lead_time: Zod.coerce.number().int().min(1).max(8).optional(),
+  max_cloud_cover: Zod.number().int().min(0).max(100).default(99),
+  span_end_time: Zod.date().optional(),
+  span_start_time: Zod.date().optional(),
+  type: Zod.enum(tabs),
 });
 
-type FormValues = Zod.infer<typeof formValidator>;
+type TFormSchema = Zod.infer<typeof formValidator>;
 
 export default function Form() {
-  const [cloudCover, setCloudCover] = useState(50);
-  const [email, setEmail] = useState("");
-  const [leadTime, setLeadTime] = useState(1);
-  const [emailError, setEmailError] = useState("");
-  const [acquisitionType, setAcquisitionType] = useState("most-recent");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [historicalDate, setHistoricalDate] = useState("");
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
   const [isExpanded, setExpanded] = useState(false);
 
-  const { handleSubmit, register, getValues } = useForm<FormValues>({
+  const {
+    handleSubmit,
+    control,
+    register,
+    formState,
+    setValue,
+    getValues,
+    watch,
+  } = useForm<TFormSchema>({
     resolver: zodResolver(formValidator),
     defaultValues: {
-      endDate: new Date().toISOString(),
-      cloudCover: 50,
-      lng: lngLat.lng,
-      lat: lngLat.lat,
+      max_cloud_cover: 100,
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  console.log("formState", formState);
+
+  const cloudness = watch("max_cloud_cover");
+
+  useEffect(() => {
+    if (lngLat.lng !== getValues("longitude")) {
+      setValue("longitude", lngLat.lng);
+    }
+
+    if (lngLat.lat !== getValues("latitude")) {
+      setValue("latitude", lngLat.lat);
+    }
+  }, [lngLat.lng, lngLat.lat]);
+
+  const onSubmit = (data: TFormSchema) => {
+    console.log("data", data);
     // const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
     // let acquisitionDetails;
     // switch (acquisitionType) {
@@ -74,7 +90,7 @@ export default function Form() {
   return (
     <Card className="w-full max-w-4xl mx-auto border-none">
       <CardHeader>
-        <CardTitle>Landsat 8/9 Notification Service</CardTitle>
+        <CardTitle>Space Crammers</CardTitle>
         <CardDescription>
           Get notified when Landsat satellites pass over your location
         </CardDescription>
@@ -82,6 +98,7 @@ export default function Form() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
+            <input type="hidden" {...register("type")} />
             <Label htmlFor="map">Select Location on Map</Label>
             <motion.div
               initial={{ height: 200 }}
@@ -103,98 +120,133 @@ export default function Form() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitude</Label>
+            <LabelWrapper label="Latitude">
               <Input
                 id="latitude"
+                min={-90}
+                max={90}
+                type="number"
+                step="any"
                 placeholder="e.g. 37.7749"
-                {...register("lat")}
+                {...register("latitude")}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setValue("latitude", value);
+                  if (value > 90 || value < -90) return;
+                  setLngLat({
+                    ...lngLat,
+                    lat: value,
+                  });
+                }}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitude</Label>
+            </LabelWrapper>
+            <LabelWrapper label="Longitude">
               <Input
                 id="longitude"
+                min={-180}
+                max={180}
+                type="number"
+                step="any"
                 placeholder="e.g. -122.4194"
-                {...register("lng")}
+                {...register("longitude")}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setValue("longitude", value);
+                  if (value > 180 || value < -180) return;
+                  setLngLat({
+                    ...lngLat,
+                    lng: value,
+                  });
+                }}
               />
-            </div>
+            </LabelWrapper>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cloudCover">Maximum Cloud Cover (%)</Label>
-            <Slider step={1} />
-            <div className="text-sm text-muted-foreground">{cloudCover}%</div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email for Notifications</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="crammers@space.org"
-              {...register("email")}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="leadTime">Notification Lead Time (days)</Label>
-            <Input
-              id="leadTime"
-              type="number"
-              min="1"
-              value={leadTime}
-              onChange={(e) => setLeadTime(parseInt(e.target.value) || 1)}
-              className="w-20"
-            />
-          </div>
-          <div className="space-y-4">
-            <Label>Landsat Acquisition Preference</Label>
-            <RadioGroup {...register("acquisitionType")}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="most-recent" id="most-recent" />
-                <Label htmlFor="most-recent">Most Recent Acquisition</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="time-span" id="time-span" />
-                <Label htmlFor="time-span">Specific Time Span</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="historical" id="historical" />
-                <Label htmlFor="historical">Historical Data</Label>
-              </div>
-            </RadioGroup>
-            {acquisitionType === "time-span" && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date</Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+            <LabelWrapper label={`Maximum Cloud Cover (${cloudness}%)`}>
+              <Controller
+                name="max_cloud_cover"
+                control={control}
+                render={({ field }) => (
+                  <Slider
+                    onChange={(event) => {
+                      field.onChange(event);
+                    }}
+                    defaultValue={[100]}
+                    step={1}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-            {acquisitionType === "historical" && (
-              <div className="space-y-2">
-                <Label htmlFor="historicalDate">Historical Date</Label>
+                )}
+              />
+            </LabelWrapper>
+          </div>
+          <div className="space-y-2">
+            <LabelWrapper label="Email for Notifications">
+              <Input
+                id="email"
+                type="email"
+                placeholder="crammers@space.org"
+                {...register("email")}
+              />
+            </LabelWrapper>
+          </div>
+
+          <Tabs
+            onValueChange={(value: string) => {
+              // @ts-expect-error: everything is a string
+              setValue("type", value);
+            }}
+            defaultValue="acquisition"
+          >
+            <TabsList
+              onSelect={(event) => {
+                console.log("Changed", event);
+              }}
+              className="mb-3"
+            >
+              <TabsTrigger value="acquisition">Next satellite pass</TabsTrigger>
+              <TabsTrigger value="historic">
+                Historic satellite passes
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="acquisition">
+              <LabelWrapper label="Notification Lead Time (days)">
                 <Input
-                  id="historicalDate"
-                  type="date"
-                  value={historicalDate}
-                  onChange={(e) => setHistoricalDate(e.target.value)}
+                  id="leadTime"
+                  type="number"
+                  min="1"
+                  {...register("lead_time")}
                 />
+              </LabelWrapper>
+            </TabsContent>
+            <TabsContent value="historic">
+              <div className="flex gap-5 flex-wrap">
+                <LabelWrapper label="Start Date">
+                  <Controller
+                    name="span_start_time"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        date={field.value}
+                        onSelect={(date) => setValue("span_start_time", date)}
+                      ></DatePicker>
+                    )}
+                  />
+                </LabelWrapper>
+                <LabelWrapper label="End Date">
+                  <Controller
+                    name="span_end_time"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        date={field.value}
+                        onSelect={(date) => setValue("span_end_time", date)}
+                      ></DatePicker>
+                    )}
+                  />
+                </LabelWrapper>
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
+
           <Button type="submit" className="w-full">
             Set Up Notifications
           </Button>

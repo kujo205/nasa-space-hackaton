@@ -25,7 +25,7 @@ const mapContainerId = "map";
 interface MapContextI {
   map: Map | null;
   lngLat: LngLat;
-  setLngLat: (lngLat: LngLat) => void;
+  setLngLat: (lngLat: Partial<LngLat>) => void;
   mapContainerId: string;
 }
 
