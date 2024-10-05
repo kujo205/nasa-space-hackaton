@@ -13,7 +13,7 @@ const layers: LayerSpecification[] = [
     type: "fill",
     source: "boundaries",
     paint: {
-      "fill-color": "#088",
+      "fill-color": "#6d28d9",
       "fill-opacity": 0.3,
     },
   },

@@ -23,7 +23,7 @@ export const useMap = () => useContext(MapContext)
 
 export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [map, setMap] = useState<Map | null>(null)
-  const [lngLat, setLngLat] = useState<LngLat | null>(new LngLat(50.4015678, 30.2023581));
+  const [lngLat, setLngLat] = useState<LngLat>(new LngLat(50.4015678, 30.2023581));
 
   useEffect(() => {
     const map = new Map({
