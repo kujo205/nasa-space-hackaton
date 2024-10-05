@@ -18,7 +18,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "SpaceCrammers",
-  description: "This site allows you to track when Landsat 8-9 whereabouts",
+  description: "This site allows you to track Landsat 8-9 whereabouts",
 };
 
 export default function RootLayout({
@@ -38,9 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <div className="bg-red mt-8 px-8">
-            {children}
-          </div>
+          <div className="bg-red mt-8 px-8">{children}</div>
         </ThemeProvider>
       </body>
     </html>

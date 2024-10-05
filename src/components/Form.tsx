@@ -81,12 +81,17 @@ export default function Form() {
               <Button
                 variant={"ghost"}
                 type="button"
+                className="gap-2"
                 disabled={!map}
                 onClick={() => {
                   setExpanded((prev) => !prev);
                 }}
               >
-                {isExpanded ? <ChevronUp /> : <ChevronDown />}
+                {isExpanded ? (
+                  <ChevronUp size={20} />
+                ) : (
+                  <ChevronDown size={20} />
+                )}
                 {isExpanded ? "Collapse" : "Expand"}
               </Button>
             </div>
