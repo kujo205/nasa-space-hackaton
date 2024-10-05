@@ -14,10 +14,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { FormEventHandler, useState } from "react";
 import { useMap } from "./maps/mapProvider";
-import { motion } from 'framer-motion';
-import Zod from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { motion } from "framer-motion";
+import Zod from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const formValidator = Zod.object({
   cloudCover: Zod.number().int().min(0).max(100),
@@ -34,14 +34,14 @@ const formValidator = Zod.object({
 type FormValues = Zod.infer<typeof formValidator>;
 
 export default function Form() {
-  // const [cloudCover, setCloudCover] = useState(50);
-  // const [email, setEmail] = useState("");
-  // const [leadTime, setLeadTime] = useState(1);
-  // const [emailError, setEmailError] = useState("");
-  // const [acquisitionType, setAcquisitionType] = useState("most-recent");
-  // const [startDate, setStartDate] = useState("");
-  // const [endDate, setEndDate] = useState("");
-  // const [historicalDate, setHistoricalDate] = useState("");
+  const [cloudCover, setCloudCover] = useState(50);
+  const [email, setEmail] = useState("");
+  const [leadTime, setLeadTime] = useState(1);
+  const [emailError, setEmailError] = useState("");
+  const [acquisitionType, setAcquisitionType] = useState("most-recent");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [historicalDate, setHistoricalDate] = useState("");
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
   const [isExpanded, setExpanded] = useState(false);
 
@@ -52,12 +52,11 @@ export default function Form() {
       cloudCover: 50,
       lng: lngLat.lng,
       lat: lngLat.lat,
-    }
-  })
+    },
+  });
 
   const onSubmit = (data: FormValues) => {
     // const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
-
     // let acquisitionDetails;
     // switch (acquisitionType) {
     //   case "most-recent":
@@ -71,8 +70,6 @@ export default function Form() {
     //     break;
     // }
   };
-
-  const { cloudCover, leadTime, acquisitionType, startDate, endDate, historicalDate } = getValues();
 
   return (
     <Card className="w-full max-w-4xl mx-auto border-none">
@@ -99,8 +96,9 @@ export default function Form() {
                 disabled={!map}
                 onClick={() => {
                   setExpanded((prev) => !prev);
-                }}>
-                {isExpanded ? 'Collapse' : 'Expand'}
+                }}
+              >
+                {isExpanded ? "Collapse" : "Expand"}
               </Button>
             </div>
           </div>
@@ -110,7 +108,7 @@ export default function Form() {
               <Input
                 id="latitude"
                 placeholder="e.g. 37.7749"
-                {...register('lat')}
+                {...register("lat")}
               />
             </div>
             <div className="space-y-2">
@@ -118,18 +116,13 @@ export default function Form() {
               <Input
                 id="longitude"
                 placeholder="e.g. -122.4194"
-                {...register('lng')}
+                {...register("lng")}
               />
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="cloudCover">Maximum Cloud Cover (%)</Label>
-            <Slider
-              min={0}
-              max={100}
-              step={1}
-              {...register('cloudCover')}
-            />
+            <Slider step={1} />
             <div className="text-sm text-muted-foreground">{cloudCover}%</div>
           </div>
           <div className="space-y-2">
@@ -138,7 +131,7 @@ export default function Form() {
               id="email"
               type="email"
               placeholder="crammers@space.org"
-              {...register('email')}
+              {...register("email")}
             />
           </div>
           <div className="space-y-2">
@@ -154,7 +147,7 @@ export default function Form() {
           </div>
           <div className="space-y-4">
             <Label>Landsat Acquisition Preference</Label>
-            <RadioGroup {...register('acquisitionType')} >
+            <RadioGroup {...register("acquisitionType")}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="most-recent" id="most-recent" />
                 <Label htmlFor="most-recent">Most Recent Acquisition</Label>
