@@ -12,30 +12,14 @@ import { DatePicker } from "@/components/ui/datepicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { FormEventHandler, useEffect, useState } from "react";
-import { useMap } from "./maps/mapProvider";
+import { useEffect, useState } from "react";
+import { useMap } from "../app/maps/mapProvider";
 import { motion } from "framer-motion";
-import Zod from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LabelWrapper } from "@/components/ui/input";
-
-const tabs = ["acquisition", "historic"] as const;
-
-const formValidator = Zod.object({
-  email: Zod.string().email(),
-  latitude: Zod.coerce.number().min(-90).max(90),
-  longitude: Zod.coerce.number().min(-180).max(180),
-  lead_time: Zod.coerce.number().int().min(1).max(8).optional(),
-  max_cloud_cover: Zod.number().int().min(0).max(100).default(99),
-  span_end_time: Zod.date().optional(),
-  span_start_time: Zod.date().optional(),
-  type: Zod.enum(tabs),
-});
-
-type TFormSchema = Zod.infer<typeof formValidator>;
+import { formSchema, tabs, type TFormSchema } from "@/app/schemes/formSchema";
 
 export default function Form() {
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
@@ -50,7 +34,7 @@ export default function Form() {
     getValues,
     watch,
   } = useForm<TFormSchema>({
-    resolver: zodResolver(formValidator),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       max_cloud_cover: 100,
     },
@@ -58,6 +42,7 @@ export default function Form() {
 
   const cloudness = watch("max_cloud_cover");
 
+  console.log("errors", errors);
   useEffect(() => {
     if (lngLat.lng !== getValues("longitude")) {
       setValue("longitude", lngLat.lng);
@@ -70,19 +55,6 @@ export default function Form() {
 
   const onSubmit = (data: TFormSchema) => {
     console.log("data", data);
-    // const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
-    // let acquisitionDetails;
-    // switch (acquisitionType) {
-    //   case "most-recent":
-    //     acquisitionDetails = "Most recent acquisition";
-    //     break;
-    //   case "time-span":
-    //     acquisitionDetails = `Acquisitions from ${startDate} to ${endDate}`;
-    //     break;
-    //   case "historical":
-    //     acquisitionDetails = `Historical data from ${historicalDate}`;
-    //     break;
-    // }
   };
 
   return (
@@ -213,7 +185,7 @@ export default function Form() {
             </TabsList>
             <TabsContent value="acquisition">
               <LabelWrapper
-                error={errors.span_start_time?.message}
+                error={errors.lead_time?.message}
                 label="Notification Lead Time (days)"
               >
                 <Input
