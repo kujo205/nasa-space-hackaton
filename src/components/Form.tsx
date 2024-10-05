@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,7 @@ export default function Form() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       max_cloud_cover: 100,
+      type: "acquisition",
     },
   });
 
@@ -53,8 +55,20 @@ export default function Form() {
     }
   }, [lngLat.lng, lngLat.lat]);
 
-  const onSubmit = (data: TFormSchema) => {
-    console.log("data", data);
+  const onSubmit = async (data: TFormSchema) => {
+    const res = await fetch("/api/form", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const parsedRes = await res.json();
+
+    if (res.ok && "message" in parsedRes) {
+      toast.success(parsedRes.message);
+    }
   };
 
   return (

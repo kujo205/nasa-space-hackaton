@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} relative antialiased min-h-screen`}
       >
+        <Toaster richColors={true} closeButton={true} />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
