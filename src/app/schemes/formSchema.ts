@@ -9,7 +9,7 @@ export const formSchema = Zod.object({
   latitude: Zod.coerce.number().min(-90).max(90),
   longitude: Zod.coerce.number().min(-180).max(180),
   lead_time: leadTimeSchema.optional(),
-  max_cloud_cover: Zod.number().int().min(0).max(100).default(99),
+  max_cloud_cover: Zod.coerce.number().int().min(0).max(100).default(99),
   span_end_time: dateSchema,
   span_start_time: dateSchema,
   type: Zod.enum(tabs),
