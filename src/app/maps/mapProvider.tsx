@@ -6,6 +6,7 @@ import {
   NavigationControl,
   MapMouseEvent,
   Marker,
+  GeolocateControl,
 } from "mapbox-gl";
 import {
   createContext,
@@ -51,9 +52,26 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
       style: "mapbox://styles/mapbox/standard",
       minZoom: 0,
       maxZoom: 24,
+      attributionControl: false,
     });
 
     map.addControl(new NavigationControl());
+    map.addControl(
+      new GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true,
+        },
+        fitBoundsOptions: {
+          zoom: 3,
+        },
+      }).on("geolocate", (e) => {
+        // @ts-expect-error: types
+        setLngLat({
+          lng: e.coords.longitude,
+          lat: e.coords.latitude,
+        });
+      }),
+    );
 
     map.on("load", () => {
       const { source: boundariesSource, layers, id } = LandSatBoundaries;
