@@ -6,14 +6,16 @@ export async function POST(request: Request) {
   const body: TFormSchema = await request.json();
 
   if (body.type === "acquisition") {
-    const res = await db
-      .insertInto("submitted_forms")
-      .values(body)
-      .returning("id")
-      .executeTakeFirst();
+    // fetch send back a prediction date
   } else {
     // fetch data for a given date range and send an email
   }
+
+  const res = await db
+    .insertInto("submitted_forms")
+    .values(body)
+    .returning("id")
+    .executeTakeFirst();
 
   return NextResponse.json({
     ok: true,
