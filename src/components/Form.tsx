@@ -20,6 +20,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LabelWrapper } from "@/components/ui/input";
 import { formSchema, tabs, type TFormSchema } from "@/app/schemes/formSchema";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Form() {
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
@@ -42,7 +43,6 @@ export default function Form() {
 
   const cloudness = watch("max_cloud_cover");
 
-  console.log("errors", errors);
   useEffect(() => {
     if (lngLat.lng !== getValues("longitude")) {
       setValue("longitude", lngLat.lng);
@@ -79,12 +79,14 @@ export default function Form() {
             />
             <div className="w-full flex justify-center">
               <Button
+                variant={"ghost"}
                 type="button"
                 disabled={!map}
                 onClick={() => {
                   setExpanded((prev) => !prev);
                 }}
               >
+                {isExpanded ? <ChevronUp /> : <ChevronDown />}
                 {isExpanded ? "Collapse" : "Expand"}
               </Button>
             </div>
