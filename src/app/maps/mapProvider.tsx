@@ -29,6 +29,7 @@ interface MapContextI {
   mapContainerId: string;
 }
 
+// @ts-expect-error: MapContextI is empty
 const MapContext = createContext<MapContextI>({});
 
 export const useMap = () => useContext(MapContext);
