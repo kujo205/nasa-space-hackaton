@@ -15,64 +15,64 @@ import { Slider } from "@/components/ui/slider";
 import { FormEventHandler, useState } from "react";
 import { useMap } from "./maps/mapProvider";
 import { motion } from 'framer-motion';
-import Zod from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const formValidator = Zod.object({
-  cloudCover: Zod.number().int().min(0).max(100),
-  email: Zod.string().email(),
-  leadTime: Zod.number().int().min(1),
-  acquisitionType: Zod.enum(["most-recent", "time-span", "historical"]),
-  startDate: Zod.string().optional(),
-  endDate: Zod.string().optional(),
-  historicalDate: Zod.string().optional(),
-  lng: Zod.number().min(-180).max(180),
-  lat: Zod.number().min(-90).max(90),
-});
-
-type FormValues = Zod.infer<typeof formValidator>;
 
 export default function Form() {
-  // const [cloudCover, setCloudCover] = useState(50);
-  // const [email, setEmail] = useState("");
-  // const [leadTime, setLeadTime] = useState(1);
-  // const [emailError, setEmailError] = useState("");
-  // const [acquisitionType, setAcquisitionType] = useState("most-recent");
-  // const [startDate, setStartDate] = useState("");
-  // const [endDate, setEndDate] = useState("");
-  // const [historicalDate, setHistoricalDate] = useState("");
+  const [cloudCover, setCloudCover] = useState(50);
+  const [email, setEmail] = useState("");
+  const [leadTime, setLeadTime] = useState(1);
+  const [emailError, setEmailError] = useState("");
+  const [acquisitionType, setAcquisitionType] = useState("most-recent");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [historicalDate, setHistoricalDate] = useState("");
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
   const [isExpanded, setExpanded] = useState(false);
 
-  const { handleSubmit, register, getValues } = useForm<FormValues>({
-    resolver: zodResolver(formValidator),
-    defaultValues: {
-      endDate: new Date().toISOString(),
-      cloudCover: 50,
-      lng: lngLat.lng,
-      lat: lngLat.lat,
-    }
-  })
-
-  const onSubmit = (data: FormValues) => {
-    // const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
-
-    // let acquisitionDetails;
-    // switch (acquisitionType) {
-    //   case "most-recent":
-    //     acquisitionDetails = "Most recent acquisition";
-    //     break;
-    //   case "time-span":
-    //     acquisitionDetails = `Acquisitions from ${startDate} to ${endDate}`;
-    //     break;
-    //   case "historical":
-    //     acquisitionDetails = `Historical data from ${historicalDate}`;
-    //     break;
-    // }
+  const validateEmail = (email: string) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(String(email).toLowerCase());
   };
 
-  const { cloudCover, leadTime, acquisitionType, startDate, endDate, historicalDate } = getValues();
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+    setEmailError("");
+
+    const notificationDetails = `${leadTime} day${leadTime > 1 ? "s" : ""} before the event`;
+
+    let acquisitionDetails;
+    switch (acquisitionType) {
+      case "most-recent":
+        acquisitionDetails = "Most recent acquisition";
+        break;
+      case "time-span":
+        acquisitionDetails = `Acquisitions from ${startDate} to ${endDate}`;
+        break;
+      case "historical":
+        acquisitionDetails = `Historical data from ${historicalDate}`;
+        break;
+    }
+
+    // Here you would typically send the data to your backend
+    console.log("Submitting:", {
+      lngLat,
+      cloudCover,
+      email,
+      leadTime,
+      acquisitionType,
+      acquisitionDetails,
+    });
+    alert(
+      `Notification settings saved! You will be notified ${notificationDetails} for ${acquisitionDetails} when Landsat passes over the selected location.`,
+    );
+  };
+
+  const setPosition = ( { lng, lat }: { lng: number, lat: number }) => {
+    setLngLat([lng, lat]);
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto border-none">
@@ -83,7 +83,7 @@ export default function Form() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="map">Select Location on Map</Label>
             <motion.div
@@ -99,8 +99,11 @@ export default function Form() {
                 disabled={!map}
                 onClick={() => {
                   setExpanded((prev) => !prev);
-                }}>
-                {isExpanded ? 'Collapse' : 'Expand'}
+                }}
+                className="">
+                {
+                  isExpanded ? 'Collapse' : 'Expand'
+                }
               </Button>
             </div>
           </div>
@@ -110,7 +113,8 @@ export default function Form() {
               <Input
                 id="latitude"
                 placeholder="e.g. 37.7749"
-                {...register('lat')}
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -118,17 +122,20 @@ export default function Form() {
               <Input
                 id="longitude"
                 placeholder="e.g. -122.4194"
-                {...register('lng')}
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
               />
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="cloudCover">Maximum Cloud Cover (%)</Label>
             <Slider
+              id="cloudCover"
               min={0}
               max={100}
               step={1}
-              {...register('cloudCover')}
+              value={[cloudCover]}
+              onValueChange={(value) => setCloudCover(value[0])}
             />
             <div className="text-sm text-muted-foreground">{cloudCover}%</div>
           </div>
@@ -138,8 +145,10 @@ export default function Form() {
               id="email"
               type="email"
               placeholder="crammers@space.org"
-              {...register('email')}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
+            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="leadTime">Notification Lead Time (days)</Label>

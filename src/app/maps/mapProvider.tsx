@@ -11,7 +11,7 @@ const mapContainerId = 'map'
 
 interface MapContextI {
   map: Map | null
-  lngLat: LngLat | null
+  lngLat: LngLat
   setLngLat: (lngLat: LngLat) => void
   mapContainerId: string
 }
@@ -23,13 +23,13 @@ export const useMap = () => useContext(MapContext)
 
 export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [map, setMap] = useState<Map | null>(null)
-  const [lngLat, setLngLat] = useState<LngLat | null>(null);
+  const [lngLat, setLngLat] = useState<LngLat | null>(new LngLat(50.4015678, 30.2023581));
 
   useEffect(() => {
     const map = new Map({
       container: mapContainerId,
       accessToken,
-      center: [-0.126326, 51.533582],
+      center: lngLat,
       zoom: 3,
       pitch: 0,
       bearing: 0,
