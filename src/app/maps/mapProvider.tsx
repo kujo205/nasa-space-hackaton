@@ -29,7 +29,6 @@ interface MapContextI {
   mapContainerId: string;
 }
 
-// @ts-expect-error [Will be defined in the MapProvider component]
 const MapContext = createContext<MapContextI>({});
 
 export const useMap = () => useContext(MapContext);
@@ -44,7 +43,6 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
     const map = new Map({
       container: mapContainerId,
       accessToken,
-      // @ts-expect-error [Will be defined in the MapProvider component]
       center: lngLat,
       zoom: 3,
       pitch: 0,
