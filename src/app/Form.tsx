@@ -154,10 +154,7 @@ export default function Form() {
           </div>
           <div className="space-y-4">
             <Label>Landsat Acquisition Preference</Label>
-            <RadioGroup
-              value={acquisitionType}
-              onValueChange={setAcquisitionType}
-            >
+            <RadioGroup {...register('acquisitionType')} >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="most-recent" id="most-recent" />
                 <Label htmlFor="most-recent">Most Recent Acquisition</Label>
