@@ -78,7 +78,7 @@ export default function Form() {
       method: "POST",
       body: JSON.stringify({
         ...data,
-        expected_pass_time: time.toISOString(),
+        expected_pass_time: time!.toISOString(),
       }),
       headers: {
         "Content-Type": "application/json",
@@ -319,6 +319,11 @@ type DateTableItem =
 const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) => {
   const { lngLat, pathRow } = useMap();
   const [data, setData] = useState<DateTableItem[]>([]);
+  const sorted = useMemo(() => data
+    .filter((i) => new Date(i.date).getTime() > new Date().getTime())
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [data]);
+  const landsat8 = useMemo(() => sorted.find(i => i.satellite === 'landsat_8')?.date, [sorted]);
+  const landsat9 = useMemo(() => sorted.find(i => i.satellite === 'landsat_9')?.date, [sorted]);
 
   const momized = useMemo(() => ({ lngLat, path: pathRow.current.path }), [lngLat.lng, lngLat.lat]);
   const debounced = useDebounce(momized, 500);
@@ -376,15 +381,6 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
     });
   }
 
-  const oneDayRange = (dateString: string) => {
-    const date = new Date(dateString);
-    const oneInTheFuture = new Date();
-    oneInTheFuture.setDate(oneInTheFuture.getDate() + 1);
-    const oneInThePast = new Date();
-    oneInThePast.setHours(0, 0, 0, 0);
-    return date > oneInThePast && date < oneInTheFuture;
-  }
-
   return (
     <div>
       {['landsat_8', 'landsat_9'].map((satellite) => (
@@ -406,7 +402,9 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
             {data.filter((i) => i.satellite === satellite).map((item) => (
               <TableRow key={item.id}>
                 <TableCell
-                  className={oneDayRange(item.date) ? "text-primary" : "text-inherit"}
+                  className={
+                    (item.date === landsat8 && satellite === 'landsat_8') || (item.date === landsat9 && satellite === 'landsat_9')
+                      ? "text-primary" : "text-inherit"}
                 >{formatDate(item.date)}</TableCell>
                 <TableCell>{item.cycle}</TableCell>
                 <TableCell>{pathRow.current?.path}</TableCell>
