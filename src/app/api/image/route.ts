@@ -1,4 +1,5 @@
 import { Jimp } from "jimp";
+import { getPhotoFromSentinel } from "@/server/utils/getPhotoFromSentinel";
 
 type Body = {
   lng: number;
@@ -43,14 +44,19 @@ export async function POST(request: Request) {
     to = new Date().toISOString(),
   } = body;
 
+  const imageData = await getPhotoFromSentinel(
+    lng,
+    lat,
+    maxCloudCoverage,
+    from,
+    to,
+  );
+
   const color = await getPixelGrid(imageData);
 
   return new Response(
     JSON.stringify({
       color,
     }),
-    {
-      status: response.status,
-    },
   );
 }
