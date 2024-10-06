@@ -77,7 +77,7 @@ export default function Form() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border-none">
+    <Card className="max-w-4xl w-full mx-auto border-none">
       <CardHeader>
         <CardTitle>Space Crammers</CardTitle>
         <CardDescription>
