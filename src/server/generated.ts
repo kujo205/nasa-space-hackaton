@@ -35,7 +35,10 @@ export interface PathMetadata {
 export interface SubmittedForms {
   created_at: Generated<Timestamp>;
   email: string;
+  expected_pass_time: Timestamp | null;
+  has_satellite_passed_over: Generated<boolean | null>;
   id: Generated<Int8>;
+  is_reminder_sent: Generated<boolean | null>;
   latitude: number;
   lead_time: Int8 | null;
   longitude: number;

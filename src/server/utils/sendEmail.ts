@@ -16,12 +16,11 @@ type TemplateData = {
     pass_date: string;
     max_cloud_cover: string;
     map_image_link: string;
-    pixel_image_link: string;
+    svg: string;
   };
   landsat_notification: {
     user_name: string;
     days_left: number;
-    hours_left: number;
     max_cloud_cover: number; // 0-100
     latitude: number;
     longitude: number;
