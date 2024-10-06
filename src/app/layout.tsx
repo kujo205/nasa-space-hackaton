@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
@@ -18,7 +19,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "SpaceCrammers",
-  description: "This site allows you to track when Landsat 8-9 whereabouts",
+  description: "This site allows you to track Landsat 8-9 whereabouts",
 };
 
 export default function RootLayout({
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} relative antialiased min-h-screen`}
       >
+        <Toaster richColors={true} closeButton={true} />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -38,9 +40,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <div className="bg-red mt-8 px-8">
-            {children}
-          </div>
+          <div className="bg-red mt-8 px-8">{children}</div>
         </ThemeProvider>
       </body>
     </html>
