@@ -10,8 +10,8 @@ export async function getPixelSVGAndLoadS3Photo(
   formId: string,
 ) {
   const ms = new Date(time).getTime();
-  const timeStart = new Date(ms).toISOString();
-  const timeEnd = new Date(time + 1000 * 60 * 60 * 24).toISOString();
+  const timeStart = new Date(ms - 1000 * 60 * 60 * 24).toISOString();
+  const timeEnd = new Date(ms + 1000 * 60 * 60 * 24).toISOString();
 
   const imageData = await getPhotoFromSentinel(
     lng,
@@ -21,26 +21,12 @@ export async function getPixelSVGAndLoadS3Photo(
     timeEnd,
   );
 
-  const colorArray = await getPixelGrid(imageData);
+  const gridUrl = await getPixelGrid(imageData);
 
   const photoUrl = await loadPngFileToS3(Buffer.from(imageData), formId);
 
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
-  <rect x="0" y="0" width="100" height="100" fill="${colorArray[0].toString(16)}"/>
-  <rect x="100" y="0" width="100" height="100" fill="${colorArray[1].toString(16)}" />
-  <rect x="200" y="0" width="100" height="100" fill="${colorArray[2].toString(16)}" />
-  <rect x="0" y="100" width="100" height="100" fill="${colorArray[3].toString(16)}" />
-  <rect x="100" y="100" width="100" height="100" fill="${colorArray[4].toString(16)}" />
-  <rect x="200" y="100" width="100" height="100" fill="${colorArray[5].toString(16)}" />
-  <rect x="0" y="200" width="100" height="100" fill="${colorArray[6].toString(16)}" />
-  <rect x="100" y="200" width="100" height="100" fill="${colorArray[7].toString(16)}" />
-  <rect x="200" y="200" width="100" height="100" fill="${colorArray[8].toString(16)}" />
-</svg>
-  `;
-
   return {
-    svg,
+    gridUrl,
     photoUrl,
   };
 }
@@ -50,16 +36,17 @@ const getPixelGrid = async (buffer: ArrayBuffer) => {
 
   const { width, height } = image.bitmap;
 
-  const grid = [];
+  const grid: string[] = [];
+
   for (const x of [-1, 0, 1]) {
     for (const y of [-1, 0, 1]) {
       const color = image.getPixelColor(
         Math.floor(width / 2) + x,
         Math.floor(height / 2) + y,
       );
-      grid.push(color);
+      grid.push(`${color.toString(16)}`);
     }
   }
 
-  return grid;
+  return `https://imgenx.vercel.app/img?s=300x300&fill=0xffffff&l=shp:rect;w:100,h:100,c:0x${grid[0]}|shp:rect;x:100,w:100,h:100,c:0x${grid[1]}|shp:rect;x:200,w:100,h:100,c:0x${grid[2]}|shp:rect;y:100,w:100,h:100,c:0x${grid[3]}|shp:rect;x:100,y:100,w:100,h:100,c:0x${grid[4]}|shp:rect;x:200,y:100,w:100,h:100,c:0x${grid[5]}|shp:rect;y:200,w:100,h:100,c:0x${grid[6]}|shp:rect;x:100,y:200,w:100,h:100,c:0x${grid[7]}|shp:rect;x:200,y:200,w:100,h:100,c:0x${grid[8]}`;
 };

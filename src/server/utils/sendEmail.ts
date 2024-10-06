@@ -16,7 +16,7 @@ type TemplateData = {
     pass_date: string;
     max_cloud_cover: string;
     map_image_link: string;
-    svg: string;
+    gridUrl: Record<number, string>;
   };
   landsat_notification: {
     user_name: string;

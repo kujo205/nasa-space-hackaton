@@ -62,7 +62,7 @@ async function getAccessToken() {
   );
 
   const data = await response.json();
-  if (data.error) {
+  if (!response.ok) {
     throw new Error(data.error);
   }
   const token = data.access_token;

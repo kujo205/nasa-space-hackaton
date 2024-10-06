@@ -85,7 +85,7 @@ export async function GET(request: Request) {
     const timeLeft = delta + MS_PER_HOUR * 6;
 
     if (timeLeft < 0) {
-      const { svg, photoUrl } = await getPixelSVGAndLoadS3Photo(
+      const { gridUrl, photoUrl } = await getPixelSVGAndLoadS3Photo(
         person.longitude,
         person.latitude,
         Number(person.max_cloud_cover),
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
           max_cloud_cover: String(person.max_cloud_cover),
           user_name: person.email,
           map_image_link: photoUrl,
-          svg: svg,
+          gridUrl,
         },
       });
 
