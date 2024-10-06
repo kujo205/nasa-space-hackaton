@@ -77,7 +77,7 @@ function getRequestForm(
   from: string,
   to: string,
 ) {
-  const range = 0.01;
+  const range = 0.1;
   const bbox = [lng - range, lat - range, lng + range, lat + range];
   const requestBody = {
     input: {
