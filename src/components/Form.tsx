@@ -1,6 +1,7 @@
 "use client";
 import { toast } from "sonner";
 
+import { formSchema, type TFormSchema } from "@/app/schemes/formSchema";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,18 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/datepicker";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { Input, LabelWrapper } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMap } from "../app/maps/mapProvider";
-import { motion } from "framer-motion";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LabelWrapper } from "@/components/ui/input";
-import { formSchema, tabs, type TFormSchema } from "@/app/schemes/formSchema";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,8 +22,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { abort } from "process";
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useMap } from "../app/maps/mapProvider";
 
 export default function Form() {
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
@@ -84,7 +82,7 @@ export default function Form() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border-none">
+    <Card className="w-full max-w-4xl mx-auto bg-bg-t border-none">
       <CardHeader>
         <CardTitle>Space Crammers</CardTitle>
         <CardDescription>
@@ -103,7 +101,7 @@ export default function Form() {
               onAnimationComplete={() => map?.resize()}
             ><div
                 id={mapContainerId}
-                className="w-full h-full"
+                className="w-full h-full rounded-lg"
               />
             </motion.div>
             <div className="w-full flex justify-center">
