@@ -1,10 +1,12 @@
 <div align="center">
+  <img src="https://github.com/user-attachments/assets/88086824-2461-4285-adb7-a00a500e4ada" alt="SpaceCrammers Logo" width="200" >
   <h1>
-    <span style="color: #030711;">Space</span>Crammers
-    <img src="https://github.com/user-attachments/assets/88086824-2461-4285-adb7-a00a500e4ada" width="100"
-        height="100" style="transform: translateY(35%);">
+    SpaceCrammers
   </h1>
+  <br>
 </div>
+
+You can always check the live version of the project [here](https://www.space-crammers.earth)
 
 ## Getting Started
 ```bash
