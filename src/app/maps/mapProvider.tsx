@@ -1,7 +1,7 @@
 "use client";
 
 import { LngLat, Map, NavigationControl, MapMouseEvent, Marker } from 'mapbox-gl'
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, FC, MutableRefObject, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { LandSatBoundaries } from './source';
 
@@ -14,6 +14,10 @@ interface MapContextI {
   lngLat: LngLat
   setLngLat: (lngLat: LngLat) => void
   mapContainerId: string
+  pathRow: MutableRefObject<{
+    path: number;
+    row: number;
+  } | null>
 }
 
 // @ts-expect-error [Will be defined in the MapProvider component]
@@ -24,6 +28,7 @@ export const useMap = () => useContext(MapContext)
 export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [map, setMap] = useState<Map | null>(null)
   const [lngLat, setLngLat] = useState<LngLat>(new LngLat(50.4015678, 30.2023581));
+  const pathRow = useRef<{ path: number, row: number } | null>(null)
 
   useEffect(() => {
     const map = new Map({
@@ -67,7 +72,19 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
     if (!map) return
 
     const boundaries = (event: MapMouseEvent) => {
-      console.log(event.features);
+      const feature = event.features?.at(0)
+      if (!feature) return
+      const description = feature.properties?.description
+
+      const pathMatch = description.match(/<strong>PATH<\/strong>:\s*(\d+(\.\d+)?)/);
+      const rowMatch = description.match(/<strong>ROW<\/strong>:\s*(\d+(\.\d+)?)/);
+
+      const path = pathMatch ? parseInt(pathMatch[1]) : null;
+      const row = rowMatch ? parseInt(rowMatch[1]) : null;
+
+      if (path && row) {
+        pathRow.current = { path, row }
+      }
     }
 
     map.on('click', ['boundaries'], boundaries)
@@ -96,7 +113,7 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [map, lngLat])
 
   return (
-    <MapContext.Provider value={{ map, lngLat, setLngLat, mapContainerId }}>
+    <MapContext.Provider value={{ map, lngLat, setLngLat, mapContainerId, pathRow }}>
       {children}
     </MapContext.Provider>
   )
