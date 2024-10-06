@@ -1,6 +1,7 @@
 "use client";
 import { toast } from "sonner";
 
+import { formSchema, type TFormSchema } from "@/app/schemes/formSchema";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,18 +11,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/datepicker";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { Input, LabelWrapper } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useState } from "react";
-import { useMap } from "../app/maps/mapProvider";
-import { motion } from "framer-motion";
-import { useForm, Controller } from "react-hook-form";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LabelWrapper } from "@/components/ui/input";
-import { formSchema, tabs, type TFormSchema } from "@/app/schemes/formSchema";
+import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useMap } from "../app/maps/mapProvider";
 
 export default function Form() {
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
@@ -77,7 +85,7 @@ export default function Form() {
   };
 
   return (
-    <Card className="max-w-4xl w-full mx-auto border-none">
+    <Card className="max-w-4xl w-full mx-auto bg-bg-t border-none">
       <CardHeader>
         <CardTitle>Space Crammers</CardTitle>
         <CardDescription>
@@ -93,9 +101,12 @@ export default function Form() {
               initial={{ height: 200 }}
               animate={{ height: isExpanded ? window.innerHeight - 100 : 200 }}
               transition={{ duration: 0.25 }}
-              id={mapContainerId}
               onAnimationComplete={() => map?.resize()}
-            />
+            ><div
+                id={mapContainerId}
+                className="w-full h-full rounded-lg"
+              />
+            </motion.div>
             <div className="w-full flex justify-center">
               <Button
                 variant={"ghost"}
@@ -157,6 +168,7 @@ export default function Form() {
               />
             </LabelWrapper>
           </div>
+          <DateTable />
           <div className="space-y-2">
             <LabelWrapper
               error={errors.max_cloud_cover?.message}
@@ -265,4 +277,126 @@ export default function Form() {
       </CardContent>
     </Card>
   );
+}
+
+
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+const DateTable = () => {
+  const { lngLat, pathRow } = useMap();
+  const [data, setData] = useState<
+    {
+      date: string;
+      id: string;
+      satellite: string;
+      cycle: number;
+    }[]
+  >([]);
+
+  const momized = useMemo(() => ({ lngLat, path: pathRow.current.path }), [lngLat.lng, lngLat.lat]);
+  const debounced = useDebounce(momized, 500);
+
+  const abortController = useRef(new AbortController());
+  const [isFetching, setIsFetching] = useState(false);
+
+  const fetchData = async () => {
+    console.log("fetching...");
+    const controller = abortController.current;
+    setIsFetching(true);
+    const res = await fetch("/api/time", {
+      method: "POST",
+      body: JSON.stringify({ path: debounced.path }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal
+    }).catch(() => {
+      setIsFetching(false);
+      return null;
+    });
+
+    if (!res) return;
+
+    const parsedRes = await res.json();
+    console.log(parsedRes);
+    setIsFetching(false);
+    if (!res.ok || controller.signal.aborted) return;
+    setData(parsedRes)
+  }
+
+  useEffect(() => {
+    fetchData();
+    return () => {
+      abortController.current.abort();
+      abortController.current = new AbortController();
+    }
+  }, [debounced.lngLat.lng, debounced.lngLat.lat]);
+
+  const formatDate = (dateString: string) => {
+    // October 13, 2021 (yyyy-mm-dd)
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  const oneDayRange = (dateString: string) => {
+    const date = new Date(dateString);
+    const oneInTheFuture = new Date();
+    oneInTheFuture.setDate(oneInTheFuture.getDate() + 1);
+    const oneInThePast = new Date();
+    oneInThePast.setDate(oneInThePast.getDate() - 1);
+    return date > oneInThePast && date < oneInTheFuture;
+  }
+
+  return (
+    <div>
+      {['landsat_8', 'landsat_9'].map((satellite) => (
+        <Table key={satellite} className={
+          isFetching || data.length === 0 ? "pulse" : ""
+        }>
+          <TableCaption>{
+            satellite === 'landsat_8' ? "Landsat 8" : "Landsat 9"
+          }</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Cycle</TableHead>
+              <TableHead>Path</TableHead>
+              <TableHead>Row</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.filter((i) => i.satellite === satellite).map((item) => (
+              <TableRow key={item.id}>
+                <TableCell
+                  className={oneDayRange(item.date) ? "text-primary" : "text-inherit"}
+                >{formatDate(item.date)}</TableCell>
+                <TableCell>{item.cycle}</TableCell>
+                <TableCell>{pathRow.current?.path}</TableCell>
+                <TableCell>{pathRow.current?.row}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table >
+      ))}
+    </div>
+  )
 }
