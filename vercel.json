@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/check-pending-submission",
-      "schedule": "*/20 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
