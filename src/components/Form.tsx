@@ -27,19 +27,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useMap } from "../app/maps/mapProvider";
 
 export default function Form() {
   const { map, lngLat, setLngLat, mapContainerId } = useMap();
   const [isExpanded, setExpanded] = useState(false);
+  const [expectedTime, setExpectedTime] = useState<Date | null>(null);
 
   const {
     handleSubmit,
     control,
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting, isDirty, isValid },
     setValue,
     getValues,
     clearErrors,
@@ -69,9 +70,16 @@ export default function Form() {
   const onSubmit = async (data: TFormSchema) => {
     toast.info("Stay tight, we are scanning our database..");
 
+    const time = expectedTime;
+
+    console.log('recent', time);
+
     const res = await fetch("/api/form", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        expected_pass_time: time.toISOString(),
+      }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -168,7 +176,7 @@ export default function Form() {
               />
             </LabelWrapper>
           </div>
-          <DateTable />
+          <DateTable setTime={(t) => setExpectedTime(t)} />
           <div className="space-y-2">
             <LabelWrapper
               error={errors.max_cloud_cover?.message}
@@ -270,7 +278,12 @@ export default function Form() {
             </TabsContent>
           </Tabs>
 
-          <Button type="submit" className="w-full">
+          <Button disabled={
+            expectedTime === null ||
+            isSubmitting ||
+            !isDirty ||
+            !isValid
+          } type="submit" className="w-full">
             Set Up Notifications
           </Button>
         </form>
@@ -278,8 +291,6 @@ export default function Form() {
     </Card>
   );
 }
-
-
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -297,16 +308,17 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-const DateTable = () => {
+type DateTableItem =
+  {
+    date: string;
+    id: string;
+    satellite: string;
+    cycle: number;
+  }
+
+const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) => {
   const { lngLat, pathRow } = useMap();
-  const [data, setData] = useState<
-    {
-      date: string;
-      id: string;
-      satellite: string;
-      cycle: number;
-    }[]
-  >([]);
+  const [data, setData] = useState<DateTableItem[]>([]);
 
   const momized = useMemo(() => ({ lngLat, path: pathRow.current.path }), [lngLat.lng, lngLat.lat]);
   const debounced = useDebounce(momized, 500);
@@ -315,6 +327,7 @@ const DateTable = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   const fetchData = async () => {
+    setTime(null);
     console.log("fetching...");
     const controller = abortController.current;
     setIsFetching(true);
@@ -327,16 +340,22 @@ const DateTable = () => {
       signal: controller.signal
     }).catch(() => {
       setIsFetching(false);
+      setTime(null);
       return null;
     });
 
     if (!res) return;
 
-    const parsedRes = await res.json();
+    const parsedRes = await res.json() as DateTableItem[];
     console.log(parsedRes);
     setIsFetching(false);
     if (!res.ok || controller.signal.aborted) return;
     setData(parsedRes)
+    const mostRecentFromNow = parsedRes
+      .filter((i) => new Date(i.date).getTime() > new Date().getTime())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+    console.log('mostRecentFromNow', mostRecentFromNow);
+    setTime(new Date(mostRecentFromNow.date))
   }
 
   useEffect(() => {
@@ -362,7 +381,7 @@ const DateTable = () => {
     const oneInTheFuture = new Date();
     oneInTheFuture.setDate(oneInTheFuture.getDate() + 1);
     const oneInThePast = new Date();
-    oneInThePast.setDate(oneInThePast.getDate() - 1);
+    oneInThePast.setHours(0, 0, 0, 0);
     return date > oneInThePast && date < oneInTheFuture;
   }
 
