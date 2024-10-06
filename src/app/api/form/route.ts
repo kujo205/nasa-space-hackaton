@@ -8,14 +8,22 @@ import { sendEmail } from "@/server/utils/sendEmail";
 export async function POST(request: Request) {
   const body: TFormSchema = await request.json();
 
+  console.log("[inserting data]");
   const res = await db
     .insertInto("submitted_forms")
-    .values(body)
+    .values({
+      ...body,
+      lead_time: body.lead_time || null,
+    })
     .returning("id")
     .executeTakeFirst();
 
   if (body.type === "acquisition") {
-    // fetch send back a prediction date
+    // find out expected pass time, update table and insert correct expected time, send back user correct time
+    return NextResponse.json({
+      ok: true,
+      message: `Form submitted successfully, expect satellite pass at {put time here}`,
+    });
   } else if (body.type === "historic") {
     const photoBuffer = await getPhotoFromSentinel(
       body.longitude,
@@ -25,7 +33,9 @@ export async function POST(request: Request) {
       String(body.span_end_time),
     );
 
-    const link = await loadPngFileToS3(Buffer.from(photoBuffer));
+    const link = await loadPngFileToS3(Buffer.from(photoBuffer), res!.id);
+
+    console.log("image url", link);
 
     await sendEmail(body.email, {
       template_id: "historical_data",
@@ -43,12 +53,11 @@ export async function POST(request: Request) {
         map_image_link: link,
       },
     });
-    console.log("image url", link);
     // fetch data for a given date range and send an email
   }
 
   return NextResponse.json({
     ok: true,
-    message: "Form submitted successfully",
+    message: `Form submitted successfully, check ${body.email}'s mailbox`,
   });
 }

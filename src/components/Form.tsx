@@ -42,6 +42,7 @@ export default function Form() {
     formState: { errors },
     setValue,
     getValues,
+    clearErrors,
     watch,
   } = useForm<TFormSchema>({
     resolver: zodResolver(formSchema),
@@ -66,6 +67,8 @@ export default function Form() {
   }, [lngLat.lng, lngLat.lat]);
 
   const onSubmit = async (data: TFormSchema) => {
+    toast.info("Stay tight, we are scanning our database..");
+
     const res = await fetch("/api/form", {
       method: "POST",
       body: JSON.stringify(data),
@@ -82,7 +85,7 @@ export default function Form() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-bg-t border-none">
+    <Card className="max-w-4xl w-full mx-auto bg-bg-t border-none">
       <CardHeader>
         <CardTitle>Space Crammers</CardTitle>
         <CardDescription>
@@ -224,7 +227,7 @@ export default function Form() {
                 label="Notification Lead Time (days)"
               >
                 <Input
-                  id="leadTime"
+                  id="lead_time"
                   type="number"
                   min="1"
                   {...register("lead_time")}
