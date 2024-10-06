@@ -8,6 +8,7 @@ import { sendEmail } from "@/server/utils/sendEmail";
 export async function POST(request: Request) {
   const body: TFormSchema = await request.json();
 
+  console.log("[inserting data]");
   const res = await db
     .insertInto("submitted_forms")
     .values({
@@ -18,7 +19,11 @@ export async function POST(request: Request) {
     .executeTakeFirst();
 
   if (body.type === "acquisition") {
-    // fetch send back a prediction date
+    // find out expected pass time, update table and insert correct expected time, send back user correct time
+    return NextResponse.json({
+      ok: true,
+      message: `Form submitted successfully, expect satellite pass at {put time here}`,
+    });
   } else if (body.type === "historic") {
     const photoBuffer = await getPhotoFromSentinel(
       body.longitude,
