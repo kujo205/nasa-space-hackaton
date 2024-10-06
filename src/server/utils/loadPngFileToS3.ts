@@ -1,6 +1,7 @@
 import { s3 } from "../s3";
+import { insertIntoImagesRequestTable } from "./insertIntoPhotosTable";
 
-export async function loadPngFileToS3(data: Buffer) {
+export async function loadPngFileToS3(data: Buffer, formId: string) {
   const key = generateFileName();
   const bucket = process.env.S3_BUCKET_NAME;
   const region = process.env.S3_AWS_REGION;
@@ -18,7 +19,11 @@ export async function loadPngFileToS3(data: Buffer) {
       throw new Error("Failed to upload image to S3");
     });
 
-  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  const link = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+
+  await insertIntoImagesRequestTable(formId, link);
+
+  return link;
 }
 
 export function generateFileName() {

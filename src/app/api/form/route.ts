@@ -28,7 +28,9 @@ export async function POST(request: Request) {
       String(body.span_end_time),
     );
 
-    const link = await loadPngFileToS3(Buffer.from(photoBuffer));
+    const link = await loadPngFileToS3(Buffer.from(photoBuffer), res!.id);
+
+    console.log("image url", link);
 
     await sendEmail(body.email, {
       template_id: "historical_data",
@@ -46,7 +48,6 @@ export async function POST(request: Request) {
         map_image_link: link,
       },
     });
-    console.log("image url", link);
     // fetch data for a given date range and send an email
   }
 

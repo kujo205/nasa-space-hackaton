@@ -17,12 +17,24 @@ export interface ImageRequests {
   created_at: Generated<Timestamp>;
   id: Generated<Int8>;
   link: string | null;
-  submitted_forms_ids: Int8 | null;
+  submitted_forms_id: Int8 | null;
+}
+
+export interface Path {
+  path: Generated<Int8>;
+}
+
+export interface PathMetadata {
+  cycle: number | null;
+  date: Timestamp;
+  id: Generated<string>;
+  path: Int8 | null;
+  satellite: string | null;
 }
 
 export interface SubmittedForms {
   created_at: Generated<Timestamp>;
-  email: string | null;
+  email: string;
   id: Generated<Int8>;
   latitude: number;
   lead_time: Int8 | null;
@@ -37,5 +49,7 @@ export interface SubmittedForms {
 
 export interface DB {
   image_requests: ImageRequests;
+  path: Path;
+  path_metadata: PathMetadata;
   submitted_forms: SubmittedForms;
 }
