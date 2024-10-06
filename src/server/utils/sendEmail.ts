@@ -33,6 +33,7 @@ type TemplateData = {
     hist_start_date: string;
     hist_end_date: string;
     max_cloud_cover: number; // 0-100
+    map_image_link: string;
   };
 };
 
@@ -45,6 +46,10 @@ export async function sendEmail<T extends Keys>(
   email: string,
   template: Template<T>,
 ) {
+  console.log(`[sending a ${template.template_id} email]`);
+
+  console.log(template);
+
   const res = await fetch("https://api.mailersend.com/v1/email", {
     method: "POST",
     headers: {
@@ -53,7 +58,7 @@ export async function sendEmail<T extends Keys>(
     },
     body: JSON.stringify({
       from: {
-        email: "info@space-scrammers.earth",
+        email: "info@space-crammers.earth",
         name: "Space Crammers",
       },
       to: [
@@ -62,7 +67,7 @@ export async function sendEmail<T extends Keys>(
           name: email,
         },
       ],
-      template_id: template.template_id,
+      template_id: templateMap[template.template_id],
       tags: [],
       personalization: [
         {
@@ -72,5 +77,13 @@ export async function sendEmail<T extends Keys>(
       ],
     }),
   });
+  // const resParsed = await res.json();
+
+  if (res.ok) {
+    console.log(`[email is sent successfully]`);
+  } else {
+    console.error(`[email is not sent successfully]`);
+  }
+
   return res;
 }
