@@ -32,6 +32,18 @@ export interface PathMetadata {
   satellite: string | null;
 }
 
+export interface Path {
+  path: Generated<Int8>;
+}
+
+export interface PathMetadata {
+  cycle: number | null;
+  date: Timestamp;
+  id: Generated<string>;
+  path: Int8 | null;
+  satellite: string | null;
+}
+
 export interface SubmittedForms {
   created_at: Generated<Timestamp>;
   email: string;
