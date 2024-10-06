@@ -13,6 +13,7 @@ export const formSchema = Zod.object({
   span_end_time: dateSchema,
   span_start_time: dateSchema,
   type: Zod.enum(tabs),
+  expected_pass_time: dateSchema,
 }).superRefine((data, ctx) => {
   if (data.type === "historic") {
     if (data.span_start_time === undefined) {

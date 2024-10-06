@@ -72,7 +72,7 @@ export default function Form() {
 
     const time = expectedTime;
 
-    console.log('recent', time);
+    console.log("recent", time);
 
     const res = await fetch("/api/form", {
       method: "POST",
@@ -110,10 +110,8 @@ export default function Form() {
               animate={{ height: isExpanded ? window.innerHeight - 100 : 200 }}
               transition={{ duration: 0.25 }}
               onAnimationComplete={() => map?.resize()}
-            ><div
-                id={mapContainerId}
-                className="w-full h-full rounded-lg"
-              />
+            >
+              <div id={mapContainerId} className="w-full h-full rounded-lg" />
             </motion.div>
             <div className="w-full flex justify-center">
               <Button
@@ -278,13 +276,8 @@ export default function Form() {
             </TabsContent>
           </Tabs>
 
-          <Button disabled={
-            expectedTime === null ||
-            isSubmitting ||
-            !isDirty ||
-            !isValid
-          } type="submit" className="w-full">
-            Set Up Notifications
+          <Button type="submit" className="w-full">
+            Submit
           </Button>
         </form>
       </CardContent>
@@ -308,24 +301,40 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-type DateTableItem =
-  {
-    date: string;
-    id: string;
-    satellite: string;
-    cycle: number;
-  }
+type DateTableItem = {
+  date: string;
+  id: string;
+  satellite: string;
+  cycle: number;
+};
 
-const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) => {
+const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({
+  setTime,
+}) => {
   const { lngLat, pathRow } = useMap();
   const [data, setData] = useState<DateTableItem[]>([]);
-  const sorted = useMemo(() => data
-    .filter((i) => new Date(i.date).getTime() > new Date().getTime())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [data]);
-  const landsat8 = useMemo(() => sorted.find(i => i.satellite === 'landsat_8')?.date, [sorted]);
-  const landsat9 = useMemo(() => sorted.find(i => i.satellite === 'landsat_9')?.date, [sorted]);
+  const sorted = useMemo(
+    () =>
+      data
+        .filter((i) => new Date(i.date).getTime() > new Date().getTime())
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        ),
+    [data],
+  );
+  const landsat8 = useMemo(
+    () => sorted.find((i) => i.satellite === "landsat_8")?.date,
+    [sorted],
+  );
+  const landsat9 = useMemo(
+    () => sorted.find((i) => i.satellite === "landsat_9")?.date,
+    [sorted],
+  );
 
-  const momized = useMemo(() => ({ lngLat, path: pathRow.current.path }), [lngLat.lng, lngLat.lat]);
+  const momized = useMemo(
+    () => ({ lngLat, path: pathRow.current.path }),
+    [lngLat.lng, lngLat.lat],
+  );
   const debounced = useDebounce(momized, 500);
 
   const abortController = useRef(new AbortController());
@@ -342,7 +351,7 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
       headers: {
         "Content-Type": "application/json",
       },
-      signal: controller.signal
+      signal: controller.signal,
     }).catch(() => {
       setIsFetching(false);
       setTime(null);
@@ -351,24 +360,26 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
 
     if (!res) return;
 
-    const parsedRes = await res.json() as DateTableItem[];
+    const parsedRes = (await res.json()) as DateTableItem[];
     console.log(parsedRes);
     setIsFetching(false);
     if (!res.ok || controller.signal.aborted) return;
-    setData(parsedRes)
+    setData(parsedRes);
     const mostRecentFromNow = parsedRes
       .filter((i) => new Date(i.date).getTime() > new Date().getTime())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
-    console.log('mostRecentFromNow', mostRecentFromNow);
-    setTime(new Date(mostRecentFromNow.date))
-  }
+      .sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      )[0];
+    console.log("mostRecentFromNow", mostRecentFromNow);
+    setTime(new Date(mostRecentFromNow.date));
+  };
 
   useEffect(() => {
     fetchData();
     return () => {
       abortController.current.abort();
       abortController.current = new AbortController();
-    }
+    };
   }, [debounced.lngLat.lng, debounced.lngLat.lat]);
 
   const formatDate = (dateString: string) => {
@@ -379,17 +390,18 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
       day: "numeric",
       year: "numeric",
     });
-  }
+  };
 
   return (
     <div>
-      {['landsat_8', 'landsat_9'].map((satellite) => (
-        <Table key={satellite} className={
-          isFetching || data.length === 0 ? "pulse" : ""
-        }>
-          <TableCaption>{
-            satellite === 'landsat_8' ? "Landsat 8" : "Landsat 9"
-          }</TableCaption>
+      {["landsat_8", "landsat_9"].map((satellite) => (
+        <Table
+          key={satellite}
+          className={isFetching || data.length === 0 ? "pulse" : ""}
+        >
+          <TableCaption>
+            {satellite === "landsat_8" ? "Landsat 8" : "Landsat 9"}
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
@@ -399,21 +411,28 @@ const DateTable: FC<{ setTime: (date: Date | null) => void }> = ({ setTime }) =>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.filter((i) => i.satellite === satellite).map((item) => (
-              <TableRow key={item.id}>
-                <TableCell
-                  className={
-                    (item.date === landsat8 && satellite === 'landsat_8') || (item.date === landsat9 && satellite === 'landsat_9')
-                      ? "text-primary" : "text-inherit"}
-                >{formatDate(item.date)}</TableCell>
-                <TableCell>{item.cycle}</TableCell>
-                <TableCell>{pathRow.current?.path}</TableCell>
-                <TableCell>{pathRow.current?.row}</TableCell>
-              </TableRow>
-            ))}
+            {data
+              .filter((i) => i.satellite === satellite)
+              .map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell
+                    className={
+                      (item.date === landsat8 && satellite === "landsat_8") ||
+                      (item.date === landsat9 && satellite === "landsat_9")
+                        ? "text-primary"
+                        : "text-inherit"
+                    }
+                  >
+                    {formatDate(item.date)}
+                  </TableCell>
+                  <TableCell>{item.cycle}</TableCell>
+                  <TableCell>{pathRow.current?.path}</TableCell>
+                  <TableCell>{pathRow.current?.row}</TableCell>
+                </TableRow>
+              ))}
           </TableBody>
-        </Table >
+        </Table>
       ))}
     </div>
-  )
-}
+  );
+};

@@ -19,10 +19,9 @@ export async function POST(request: Request) {
     .executeTakeFirst();
 
   if (body.type === "acquisition") {
-    // find out expected pass time, update table and insert correct expected time, send back user correct time
     return NextResponse.json({
       ok: true,
-      message: `Form submitted successfully, expect satellite pass at {put time here}`,
+      message: `Form submitted successfully, expect satellite pass on ${String(body?.expected_pass_time).split("T")[0]}`,
     });
   } else if (body.type === "historic") {
     const photoBuffer = await getPhotoFromSentinel(
