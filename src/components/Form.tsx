@@ -34,6 +34,7 @@ export default function Form() {
     formState: { errors },
     setValue,
     getValues,
+    clearErrors,
     watch,
   } = useForm<TFormSchema>({
     resolver: zodResolver(formSchema),
@@ -212,7 +213,7 @@ export default function Form() {
                 label="Notification Lead Time (days)"
               >
                 <Input
-                  id="leadTime"
+                  id="lead_time"
                   type="number"
                   min="1"
                   {...register("lead_time")}

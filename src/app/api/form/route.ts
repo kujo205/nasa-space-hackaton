@@ -10,7 +10,10 @@ export async function POST(request: Request) {
 
   const res = await db
     .insertInto("submitted_forms")
-    .values(body)
+    .values({
+      ...body,
+      lead_time: body.lead_time || null,
+    })
     .returning("id")
     .executeTakeFirst();
 
