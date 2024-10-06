@@ -1,17 +1,10 @@
-import { useEffect } from "react"
-import { useMap } from "./mapProvider"
-
-const export
-
+import { useEffect } from "react";
+import { useMap } from "./mapProvider";
 
 export const useTimePredict = () => {
-  const { map, lngLat, pathRow} = useMap()
-
+  const { map, lngLat, pathRow } = useMap();
 
   useEffect(() => {
-    if (!map) return
-
-
-
-  }, [map, lngLat])
-}
+    if (!map) return;
+  }, [map, lngLat]);
+};
