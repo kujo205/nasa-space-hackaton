@@ -59,6 +59,8 @@ export default function Form() {
   }, [lngLat.lng, lngLat.lat]);
 
   const onSubmit = async (data: TFormSchema) => {
+    toast.info("Stay tight, we are scanning our database..");
+
     const res = await fetch("/api/form", {
       method: "POST",
       body: JSON.stringify(data),

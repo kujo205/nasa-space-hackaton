@@ -52,6 +52,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    message: "Form submitted successfully",
+    message: `Form submitted successfully, check ${body.email}'s mailbox`,
   });
 }
