@@ -31,7 +31,7 @@ interface MapContextI {
   pathRow: MutableRefObject<{
     path: number;
     row: number;
-  } | null>
+  }>
 }
 
 // @ts-expect-error: MapContextI is empty
@@ -42,9 +42,12 @@ export const useMap = () => useContext(MapContext);
 export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   const [map, setMap] = useState<Map | null>(null);
   const [lngLat, setLngLat] = useState<LngLat>(
-    new LngLat(50.4015678, 30.2023581),
+    new LngLat(-118.4117325, 34.020479),
   );
-  const pathRow = useRef<{ path: number, row: number } | null>(null)
+  const pathRow = useRef<{ path: number, row: number }>({
+    path: 41,
+    row: 36
+  })
 
   useEffect(() => {
     const map = new Map({
@@ -90,6 +93,33 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (!map || !lngLat) return;
+
+    const { layers } = LandSatBoundaries;
+    const features = map.queryRenderedFeatures(map.project(lngLat), {
+      layers: layers.map((layer) => layer.id),
+    });
+
+    const feature = features[0];
+    if (!feature) return;
+
+    const description = feature.properties?.description
+
+    const pathMatch = description.match(/<strong>PATH<\/strong>:\s*(\d+(\.\d+)?)/);
+    const rowMatch = description.match(/<strong>ROW<\/strong>:\s*(\d+(\.\d+)?)/);
+
+    const path = pathMatch ? parseInt(pathMatch[1]) : null;
+    const row = rowMatch ? parseInt(rowMatch[1]) : null;
+
+    console.log(path, row);
+    if (path !== null && row !== null) {
+      pathRow.current = { path, row }
+      console.log("setting path row", pathRow.current);
+    }
+
+  }, [map, lngLat.lng, lngLat.lat]);
+
+  useEffect(() => {
     if (!map) return;
 
     const clickHandler = (event: MapMouseEvent) => {
@@ -116,8 +146,10 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
       const path = pathMatch ? parseInt(pathMatch[1]) : null;
       const row = rowMatch ? parseInt(rowMatch[1]) : null;
 
-      if (path && row) {
+      console.log(path, row);
+      if (path !== null && row !== null) {
         pathRow.current = { path, row }
+        console.log("setting path row", pathRow.current);
       }
     }
 
@@ -126,7 +158,7 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
     return () => {
       map.off("click", ["boundaries"], boundaries);
     };
-  }, [map]);
+  }, [map, lngLat.lat, lngLat.lng]);
 
   useEffect(() => {
     if (!map || !lngLat) return;
@@ -141,11 +173,22 @@ export const MapProvider: FC<PropsWithChildren> = ({ children }) => {
     };
   }, [map, lngLat]);
 
+  useEffect(() => {
+    if (!map || !lngLat) return;
+
+    map.flyTo({
+      center: lngLat,
+      essential: true,
+    });
+
+  }, [map, lngLat]);
+
+
   if (!lngLat) return null;
 
   return (
     // @ts-expect-error: types fuck around
-    <MapContext.Provider value={{ map, lngLat, setLngLat, mapContainerId }}>
+    <MapContext.Provider value={{ map, lngLat, setLngLat, mapContainerId, pathRow }}>
       {children}
     </MapContext.Provider>
   );

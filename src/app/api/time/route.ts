@@ -15,6 +15,7 @@ type Body = {
 export async function POST(request: Request) {
   const body = (await request.json()) as Body;
   const { path } = body;
+  console.log(path);
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
