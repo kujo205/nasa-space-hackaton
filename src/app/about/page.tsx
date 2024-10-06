@@ -28,6 +28,7 @@ const atricles = [
     title: "What does our app do?",
     description:
       'Our app helps curious space researchers track the location of Landsat 8/9 satellites. Users can input their coordinates and choose whether to get historical images of the point they chose or photos of the soonest satellite pass. After entering all the details and clicking "submit", they will receive an email with all the data about their request (including location and max cloud coverage) and the type of photo they selected.  They will also receive a pinpointed pixel if they choose an option with the closest satellite pass. Besides receiving an email of satellite pass they are going to receive a notification on "n" day before it passes.\n',
+    video: true,
   },
   {
     title: "About Us",
@@ -45,6 +46,20 @@ export default function Page() {
             {article.title}
           </h2>
           <p className="mt-2 max-md:text-sm text-lg">{article.description}</p>
+
+          {article.video && (
+            <iframe
+              className="m-auto mt-10 max-w-[90%]"
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/wOuVQGZmZa8?si=rF3UT4WLp4xmT00v"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            ></iframe>
+          )}
         </article>
       ))}
 
