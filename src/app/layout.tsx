@@ -20,6 +20,21 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "SpaceCrammers",
   description: "This site allows you to track Landsat 8-9 whereabouts",
+  openGraph: {
+    title: "SpaceCrammers",
+    description: "This site allows you to track Landsat 8-9 whereabouts",
+    url: "https://nextjs.org",
+    siteName: "SpaceCrammers",
+    images: [
+      {
+        url: "/opengraph.png",
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
