@@ -82,7 +82,9 @@ export async function sendEmail<T extends Keys>(
   if (res.ok) {
     console.log(`[email is sent successfully]`);
   } else {
+    const data = await res.json();
     console.error(`[email is not sent successfully]`);
+    console.error(data);
   }
 
   return res;
